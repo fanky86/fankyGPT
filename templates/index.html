@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>💬 FankyGPT (ChatGPT)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: #fff;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .chat-container h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .chat-box {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .user {
+      background-color: #dff0ff;
+      text-align: right;
+    }
+
+    .bot {
+      background-color: #e6ffe6;
+      text-align: left;
+    }
+
+    .input-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-form input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .input-form button {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .input-form button:hover {
+      background-color: #45a049;
+    }
+
+    .nav {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .nav a {
+      text-decoration: none;
+      color: #555;
+    }
+
+    .nav a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2>💬 FankyGPT</h2>
+    <div class="chat-box" id="chat-box">
+      {% if chat_input and chat_response %}
+        <div class="message user"><strong>Kamu:</strong> {{ chat_input }}</div>
+        <div class="message bot"><strong>FankyGPT:</strong> {{ chat_response }}</div>
+      {% else %}
+        <div class="message bot">Halo! Saya FankyGPT. Silakan tulis pertanyaan kamu.</div>
+      {% endif %}
+    </div>
+
+    <form method="post" action="/chat-gpt" class="input-form">
+      <input type="text" name="message" placeholder="Tulis pesan..." required>
+      <button type="submit">Kirim</button>
+    </form>
+
+    <div class="nav">
+      <a href="/lokal">🔄 Ke Halaman Model Lokal</a>
+    </div>
+  </div>
+</body>
+</html>

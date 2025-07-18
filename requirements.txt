@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+jinja2
+requests
+beautifulsoup4
+scikit-learn
+supabase
