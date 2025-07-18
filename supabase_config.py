@@ -38,7 +38,7 @@ def download_model_from_supabase(file_path):
 def save_chat_to_supabase(user_input, response_text, user_id):
     try:
         data = {
-            "user_id": user_id,
+            "id": user_id,  # ganti dari "user_id"
             "input": user_input,
             "output": response_text,
             "timestamp": datetime.utcnow().isoformat()
@@ -52,7 +52,7 @@ def get_chat_history(user_id):
     try:
         response = supabase.table("chat_logs") \
             .select("input, output") \
-            .eq("user_id", user_id) \
+            .eq("id", user_id) \  # ganti dari "user_id"
             .order("timestamp", desc=False) \
             .execute()
 
@@ -62,5 +62,6 @@ def get_chat_history(user_id):
     except Exception as e:
         print(f"[✖] Gagal ambil riwayat chat dari Supabase: {e}")
         return []
+
 
 
