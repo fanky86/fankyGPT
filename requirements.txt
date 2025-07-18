@@ -8,3 +8,4 @@ supabase
 python-dotenv
 sympy
 python-multipart
+openai
