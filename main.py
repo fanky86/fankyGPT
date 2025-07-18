@@ -9,6 +9,9 @@ from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 import os, re
+import uuid
+from fastapi.responses import Response
+
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
