@@ -38,7 +38,22 @@ def startup_event():
 
 @app.get("/")
 def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        user_id = str(uuid.uuid4())
+        response = templates.TemplateResponse("index.html", {
+            "request": request,
+            "messages": []
+        })
+        response.set_cookie("user_id", user_id, max_age=60*60*24*365)  # 1 tahun
+        return response
+
+    # Ambil riwayat dari Supabase
+    messages = get_chat_history(user_id)
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "messages": messages
+    })
 
 @app.get("/lokal")
 def lokal_page(request: Request):
@@ -48,6 +63,11 @@ def lokal_page(request: Request):
 async def chat_gpt(request: Request):
     form = await request.form()
     user_input = form.get("message")
+    user_id = request.cookies.get("user_id")
+
+    if not user_id:
+        return HTMLResponse("<p style='color:red;'>User ID tidak ditemukan.</p>")
+
     try:
         response = client.chat.completions.create(
             model="openai/gpt-3.5-turbo",
@@ -56,14 +76,19 @@ async def chat_gpt(request: Request):
                 {"role": "user", "content": user_input}
             ]
         )
-        reply = response.choices[0].message.content
-        save_chat_to_supabase(user_input, reply)
-        train_model(user_input, reply)
+        reply = response.choices[0].message.content.strip()
+
+        # Simpan ke Supabase
+        save_chat_to_supabase(user_input, reply, user_id)
+
+        # Ambil semua riwayat lagi untuk ditampilkan
+        messages = get_chat_history(user_id)
+
         return templates.TemplateResponse("index.html", {
             "request": request,
-            "chat_input": user_input,
-            "chat_response": reply
+            "messages": messages
         })
+
     except Exception as e:
         return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi ChatGPT: {e}</p>")
 
