@@ -11,9 +11,12 @@ from sympy.core.sympify import SympifyError
 import os, re
 load_dotenv()
 
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("❌ OPENAI_API_KEY belum di-set di environment!")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENAI_API_KEY")
+    api_key=api_key
 )
 
 app = FastAPI()
