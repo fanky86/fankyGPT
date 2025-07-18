@@ -35,10 +35,12 @@ def download_model_from_supabase(file_path):
     except Exception as e:
         print(f"[✖] Gagal download dari Supabase: {e}")
 
+import uuid  # Untuk generate ID jika memang dibutuhkan secara eksplisit
+
 def save_chat_to_supabase(user_input, response_text, user_id):
     try:
         data = {
-            "id": user_id,
+            "user_id": user_id,
             "input": user_input,
             "output": response_text,
             "timestamp": datetime.utcnow().isoformat()
@@ -52,7 +54,7 @@ def get_chat_history(user_id):
     try:
         response = supabase.table("chat_logs") \
             .select("input, output") \
-            .eq("id", user_id) \
+            .eq("user_id", user_id) \ 
             .order("timestamp", desc=False) \
             .execute()
 
