@@ -8,6 +8,8 @@ from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 import os, re
+from dotenv import load_dotenv
+load_dotenv()
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
