@@ -35,10 +35,10 @@ def download_model_from_supabase(file_path):
     except Exception as e:
         print(f"[✖] Gagal download dari Supabase: {e}")
 
-def save_chat_to_supabase(user_input, response_text):
-    """Simpan obrolan user dan respon ke Supabase"""
+def save_chat_to_supabase(user_input, response_text, user_id):
     try:
         data = {
+            "user_id": user_id,
             "input": user_input,
             "output": response_text,
             "timestamp": datetime.utcnow().isoformat()
@@ -47,3 +47,20 @@ def save_chat_to_supabase(user_input, response_text):
         print("[✔] Obrolan disimpan ke Supabase.")
     except Exception as e:
         print(f"[✖] Gagal simpan obrolan ke Supabase: {e}")
+
+def get_chat_history(user_id):
+    try:
+        response = supabase.table("chat_logs") \
+            .select("input, output") \
+            .eq("user_id", user_id) \
+            .order("timestamp", desc=False) \
+            .execute()
+
+        chat_data = response.data
+        messages = [{"user": item["input"], "bot": item["output"]} for item in chat_data]
+        return messages
+    except Exception as e:
+        print(f"[✖] Gagal ambil riwayat chat dari Supabase: {e}")
+        return []
+
+
