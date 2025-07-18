@@ -2,7 +2,10 @@ from dotenv import load_dotenv
 from supabase import create_client
 from datetime import datetime
 import os
+import uuid  # Bisa dipakai jika perlu ID unik secara eksplisit
+
 load_dotenv()
+
 # Ambil URL dan KEY dari environment variable
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -35,9 +38,8 @@ def download_model_from_supabase(file_path):
     except Exception as e:
         print(f"[✖] Gagal download dari Supabase: {e}")
 
-import uuid  # Untuk generate ID jika memang dibutuhkan secara eksplisit
-
 def save_chat_to_supabase(user_input, response_text, user_id):
+    """Simpan obrolan ke Supabase dengan user_id"""
     try:
         data = {
             "user_id": user_id,
@@ -51,12 +53,15 @@ def save_chat_to_supabase(user_input, response_text, user_id):
         print(f"[✖] Gagal simpan obrolan ke Supabase: {e}")
 
 def get_chat_history(user_id):
+    """Ambil seluruh riwayat obrolan berdasarkan user_id"""
     try:
-        response = supabase.table("chat_logs") \
-            .select("input, output") \
-            .eq("user_id", user_id) \ 
-            .order("timestamp", desc=False) \
+        response = (
+            supabase.table("chat_logs")
+            .select("input, output")
+            .eq("user_id", user_id)
+            .order("timestamp", desc=False)
             .execute()
+        )
 
         chat_data = response.data
         messages = [{"user": item["input"], "bot": item["output"]} for item in chat_data]
@@ -64,6 +69,3 @@ def get_chat_history(user_id):
     except Exception as e:
         print(f"[✖] Gagal ambil riwayat chat dari Supabase: {e}")
         return []
-
-
-
