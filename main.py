@@ -11,7 +11,7 @@ import os, re
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="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"
+    api_key=os.environ.get("OPENAI_API_KEY")
 )
 
 app = FastAPI()
