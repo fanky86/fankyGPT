@@ -1,7 +1,8 @@
+from dotenv import load_dotenv
 from supabase import create_client
 from datetime import datetime
 import os
-
+load_dotenv()
 # Ambil URL dan KEY dari environment variable
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
