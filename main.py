@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,7 +9,6 @@ from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 import os, re
-from dotenv import load_dotenv
 load_dotenv()
 
 client = OpenAI(
