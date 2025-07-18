@@ -1,10 +1,10 @@
 fastapi
-uvicorn[standard]
+uvicorn
 jinja2
 requests
 beautifulsoup4
 scikit-learn
-python-dotenv
-openai
 supabase
+python-dotenv
 sympy
+python-multipart  ✅
