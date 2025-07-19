@@ -69,3 +69,5 @@ def get_memory(user_id):
     except Exception as e:
         print(f"[✖] Gagal ambil riwayat chat dari Supabase: {e}")
         return []
+
+SUPABASE = supabase
