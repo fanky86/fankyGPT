@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <title>FankyGPT Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -16,7 +19,6 @@
       flex-direction: column;
       height: 100vh;
     }
-
     header {
       padding: 1rem;
       text-align: center;
@@ -26,7 +28,6 @@
       border-bottom: 1px solid #333;
       flex-shrink: 0;
     }
-
     .content-wrapper {
       width: 100%;
       max-width: 100%;
@@ -35,11 +36,9 @@
       flex-direction: column;
       flex: 1;
     }
-
     @media (min-width: 768px) {
       .content-wrapper { max-width: 50%; }
     }
-
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -49,7 +48,6 @@
       gap: 10px;
       background-color: #000;
     }
-
     .bubble {
       background-color: #000;
       color: #fff;
@@ -60,7 +58,6 @@
       line-height: 1.4;
       max-width: 100%;
     }
-
     .user { align-self: flex-end; background-color: #1e1e1e; }
     .bot { align-self: flex-start; background-color: #333; }
 
@@ -72,7 +69,6 @@
       border-top: 1px solid #333;
       flex-shrink: 0;
     }
-
     input[type="text"] {
       padding: 10px;
       font-size: 1rem;
@@ -82,7 +78,6 @@
       background-color: #333;
       color: #fff;
     }
-
     input[type="text"]::placeholder { color: #aaa; }
 
     button {
@@ -94,8 +89,23 @@
       color: white;
       cursor: pointer;
     }
-
     button:hover { background-color: #2e7d32; }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+
+    .footer-link a {
+      color: #aaa;
+      text-decoration: none;
+    }
+
+    .footer-link a:hover {
+      text-decoration: underline;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -103,9 +113,11 @@
 
   <div class="content-wrapper">
     <div class="chat-container" id="chat-box">
-      {% if chat_input and chat_response %}
-        <div class="bubble user"><strong>Kamu:</strong> {{ chat_input }}</div>
-        <div class="bubble bot"><strong>FankyGPT:</strong> {{ chat_response }}</div>
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
+          <div class="bubble bot"><strong>FankyGPT:</strong> {{ msg.bot }}</div>
+        {% endfor %}
       {% else %}
         <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
       {% endif %}
@@ -115,6 +127,12 @@
       <input type="text" name="message" placeholder="Tanya sesuatu..." required autofocus autocomplete="off">
       <button type="submit">Kirim</button>
     </form>
+
+    <div class="footer-link">
+      <hr>
+      <a href="/">🔁 Kembali ke model lokal</a>
+      <br><br>
+    </div>
   </div>
 
   <script>
