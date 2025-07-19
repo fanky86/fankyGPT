@@ -13,9 +13,8 @@ import os, uuid
 # Load env
 load_dotenv()
 
-# Setup OpenRouter client
+# Setup OpenAI client langsung
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
@@ -64,7 +63,7 @@ async def chat_gpt(request: Request):
     user_input = form.get("message")
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Kamu adalah asisten cerdas bernama FankyGPT."},
                 {"role": "user", "content": user_input}
@@ -89,7 +88,7 @@ async def chat_gpt_json(request: Request):
 
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Kamu adalah FankyGPT, asisten cerdas dan cepat."},
                 {"role": "user", "content": user_input}
