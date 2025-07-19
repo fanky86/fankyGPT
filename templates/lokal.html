@@ -3,17 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <title>Model Lokal - FankyGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/favicon.png" type="image/png">
   <style>
     * {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', sans-serif;
       background-color: #ffffff;
       color: #222;
-      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid #ddd;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .profile {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .container {
       padding: 20px;
+      flex: 1;
     }
 
     h2, h3 {
@@ -93,59 +128,76 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>🧠 Latih dan Prediksi Model Lokal</h2>
 
-  <h3>🔤 Prediksi</h3>
-  <form method="post" action="/lokal/predict">
-    <input type="text" name="input_text" placeholder="Masukkan teks untuk prediksi">
-    <button type="submit">Prediksi</button>
-  </form>
-  {% if last_input %}
-    <div class="output-box">
-      <strong>Input:</strong> {{ last_input }}<br>
-      <strong>Hasil:</strong> {{ response }}
+  <header>
+    <strong>🧠 Model Lokal - FankyGPT</strong>
+    <div class="profile">
+      <img src="/static/favicon.png" alt="Profil">
     </div>
-  {% endif %}
+  </header>
 
-  <hr>
-
-  <h3>📚 Latih Model Manual</h3>
-  <form method="post" action="/lokal/train">
-    <input type="text" name="input_text" placeholder="Input">
-    <input type="text" name="output_text" placeholder="Output">
-    <button type="submit">Latih</button>
-  </form>
-
-  <h3>🌐 Latih dari URL</h3>
-  <form method="post" action="/lokal/train-url">
-    <input type="text" name="url" placeholder="https://example.com/artikel">
-    <button type="submit">Latih dari URL</button>
-  </form>
-
-  <h3>🔍 Pratinjau URL</h3>
-  <form method="post" action="/lokal/preview-url">
-    <input type="text" name="url" placeholder="https://example.com/artikel">
-    <button type="submit">Preview</button>
-  </form>
-
-  <hr>
-
-  <h3>🧹 Hapus Data & Model</h3>
-  <div class="button-group">
-    <form method="get" action="/hapus-data">
-      <button class="danger-btn">🗑️ Hapus Data Latih</button>
+  <div class="container">
+    <h3>🔤 Prediksi</h3>
+    <form method="post" action="/lokal/predict">
+      <input type="text" name="input_text" placeholder="Masukkan teks untuk prediksi">
+      <button type="submit">Prediksi</button>
     </form>
-    <form method="get" action="/hapus-model">
-      <button class="warning-btn">🧹 Hapus Model</button>
+    {% if last_input %}
+      <div class="output-box">
+        <strong>Input:</strong> {{ last_input }}<br>
+        <strong>Hasil:</strong> {{ response }}
+      </div>
+    {% endif %}
+
+    <hr>
+
+    <h3>📚 Latih Model Manual</h3>
+    <form method="post" action="/lokal/train">
+      <input type="text" name="input_text" placeholder="Input">
+      <input type="text" name="output_text" placeholder="Output">
+      <button type="submit">Latih</button>
     </form>
+
+    <h3>🌐 Latih dari URL</h3>
+    <form method="post" action="/lokal/train-url">
+      <input type="text" name="url" placeholder="https://example.com/artikel">
+      <button type="submit">Latih dari URL</button>
+    </form>
+
+    <h3>🔍 Pratinjau URL</h3>
+    <form method="post" action="/lokal/preview-url">
+      <input type="text" name="url" placeholder="https://example.com/artikel">
+      <button type="submit">Preview</button>
+    </form>
+
+    <hr>
+
+    <h3>🧹 Hapus Data & Model</h3>
+    <div class="button-group">
+      <form method="get" action="/hapus-data">
+        <button class="danger-btn">🗑️ Hapus Data Latih</button>
+      </form>
+      <form method="get" action="/hapus-model">
+        <button class="warning-btn">🧹 Hapus Model</button>
+      </form>
+    </div>
+
+    <hr>
+    <a href="/">🔁 Kembali ke ChatGPT</a>
+    <br><br>
+    <a href="/download-model">⬇️ Unduh Model</a>
   </div>
 
-  <hr>
-  <a href="/">🔁 Kembali ke ChatGPT</a>
-  <br><br>
-  <a href="/download-model">⬇️ Unduh Model</a>
 </body>
 </html>
