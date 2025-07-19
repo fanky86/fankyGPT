@@ -62,11 +62,34 @@ def lokal_page(request: Request):
 async def chat_gpt(request: Request):
     form = await request.form()
     user_input = form.get("message")
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Kamu adalah asisten cerdas bernama FankyGPT."},
+                {"role": "user", "content": user_input}
+            ]
+        )
+        reply = response.choices[0].message.content
+        save_chat_to_supabase(user_input, reply)
+        train_model(user_input, reply)
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "chat_input": user_input,
+            "chat_response": reply
+        })
+    except Exception as e:
+        return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi ChatGPT: {e}</p>")
+
+@app.post("/chat-gpt-json")
+async def chat_gpt_json(request: Request):
+    form = await request.form()
+    user_input = form.get("message")
     user_id = request.cookies.get("user_id")
 
     try:
         response = client.chat.completions.create(
-            model="mistralai/mistral-7b-instruct",
+            model="openai/gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Kamu adalah FankyGPT, asisten cerdas dan cepat."},
                 {"role": "user", "content": user_input}
@@ -74,22 +97,17 @@ async def chat_gpt(request: Request):
         )
         reply = response.choices[0].message.content.strip()
 
-        # Simpan ke Supabase
+        # Simpan ke Supabase jika ada user_id
         if user_id:
             save_chat_to_supabase(user_input, reply, user_id)
 
+        # Latih model lokal
         train_model(user_input, reply)
 
-        chat_history = get_memory(user_id) if user_id else []
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "chat_input": user_input,
-            "chat_response": reply,
-            "messages": chat_history
-        })
+        return {"reply": reply}
 
     except Exception as e:
-        return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi ChatGPT: {e}</p>")
+        return {"reply": f"❌ Gagal: {e}"}
 
 # Hitung ekspresi matematika jika bisa
 def hitung_ekspresi(text):
