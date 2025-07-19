@@ -23,11 +23,16 @@ client = OpenAI(
 )
 
 app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
+@app.get("/admin/data")
+def get_admin_data(user=Depends(verify_supabase_admin)):
+    return {"msg": "Authorized", "email": user["email"]}
+    
 # ─────────────────────── STARTUP ─────────────────────── #
 @app.on_event("startup")
 def startup_event():
