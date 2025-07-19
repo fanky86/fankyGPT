@@ -2,202 +2,180 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Model Lokal - FankyGPT</title>
+  <title>FankyGPT Lokal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="/static/favicon.png" type="image/png">
   <style>
     * {
       box-sizing: border-box;
     }
 
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #ffffff;
-      color: #222;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      background-color: #f9f9f9;
-      border-bottom: 1px solid #ddd;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .profile {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      overflow: hidden;
-    }
-
-    .profile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      font-family: Arial, sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
     }
 
     .container {
+      max-width: 800px;
+      margin: auto;
       padding: 20px;
-      flex: 1;
     }
 
-    h2, h3 {
-      color: #333;
-    }
-
-    form {
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
+    textarea, input[type="text"] {
       width: 100%;
       padding: 10px;
-      margin-top: 6px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      margin: 8px 0;
+      background-color: #161b22;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+      border-radius: 4px;
     }
 
     button {
-      padding: 10px 18px;
+      background-color: #238636;
+      color: white;
+      padding: 10px 20px;
       border: none;
-      border-radius: 6px;
-      background-color: #005fff;
-      color: #fff;
-      font-size: 15px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      margin-top: 5px;
     }
 
     button:hover {
-      background-color: #0047cc;
-    }
-
-    .danger-btn {
-      background-color: #e74c3c;
-    }
-
-    .danger-btn:hover {
-      background-color: #c0392b;
-    }
-
-    .warning-btn {
-      background-color: #f39c12;
-    }
-
-    .warning-btn:hover {
-      background-color: #e67e22;
-    }
-
-    a {
-      text-decoration: none;
-      color: #005fff;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #ddd;
-      margin: 30px 0;
+      background-color: #2ea043;
     }
 
     .output-box {
-      background-color: #f2f2f2;
-      padding: 12px 15px;
-      border-radius: 6px;
       margin-top: 10px;
-      white-space: pre-line;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #161b22;
+      border: 1px solid #30363d;
     }
 
-    .button-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    hr {
+      border: 1px solid #30363d;
     }
 
-    @media (max-width: 600px) {
-      header {
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 15px;
-      }
+    h1, h2, h3 {
+      color: #58a6ff;
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <strong>🧠 Model Lokal - FankyGPT</strong>
-    <div class="profile">
-      <img src="/static/favicon.png" alt="Profil">
-    </div>
-  </header>
-
   <div class="container">
-    <h3>🔤 Prediksi</h3>
-    <form method="post" action="/lokal/predict">
-      <input type="text" name="input_text" placeholder="Masukkan teks untuk prediksi">
-      <button type="submit">Prediksi</button>
+    <h1>FankyGPT Lokal</h1>
+    <h2>Model Lokal</h2>
+    <form id="local-form">
+      <label for="local-input">Masukkan Pertanyaan:</label>
+      <textarea id="local-input" name="local_input" rows="4"></textarea>
+      <button type="submit">Kirim</button>
     </form>
-    {% if last_input %}
-      <div class="output-box">
-        <strong>Input:</strong> {{ last_input }}<br>
-        <strong>Hasil:</strong> {{ response }}
-      </div>
-    {% endif %}
+    <div id="local-response" class="output-box"></div>
 
     <hr>
 
-    <h3>📚 Latih Model Manual</h3>
-    <form method="post" action="/lokal/train">
-      <input type="text" name="input_text" placeholder="Input">
-      <input type="text" name="output_text" placeholder="Output">
+    <h3>🎓 Latih Model</h3>
+    <form id="train-form">
+      <label for="train-input">Input Data Latih (format: "input => output"):</label>
+      <textarea id="train-input" name="train_input" rows="4"></textarea>
       <button type="submit">Latih</button>
     </form>
-
-    <h3>🌐 Latih dari URL</h3>
-    <form method="post" action="/lokal/train-url">
-      <input type="text" name="url" placeholder="https://example.com/artikel">
-      <button type="submit">Latih dari URL</button>
-    </form>
-
-    <h3>🔍 Pratinjau URL</h3>
-    <form method="post" action="/lokal/preview-url">
-      <input type="text" name="url" placeholder="https://example.com/artikel">
-      <button type="submit">Preview</button>
-    </form>
+    <div id="train-response" class="output-box"></div>
 
     <hr>
 
-    <h3>🧹 Hapus Data & Model</h3>
-    <div class="button-group">
-      <form method="get" action="/hapus-data">
-        <button class="danger-btn">🗑️ Hapus Data Latih</button>
-      </form>
-      <form method="get" action="/hapus-model">
-        <button class="warning-btn">🧹 Hapus Model</button>
-      </form>
-    </div>
+    <h3>🧹 Hapus Model</h3>
+    <form id="delete-form">
+      <button type="submit">Hapus Semua Data Model</button>
+    </form>
+    <div id="delete-response" class="output-box"></div>
 
     <hr>
-    <a href="/">🔁 Kembali ke ChatGPT</a>
-    <br><br>
-    <a href="/download-model">⬇️ Unduh Model</a>
+
+    <h3>📚 Lihat Data Model</h3>
+    <form id="show-form">
+      <button type="submit">Tampilkan Semua Data</button>
+    </form>
+    <div id="show-response" class="output-box"></div>
+
+    <hr>
+
+    <h3>🛡️ Cek Admin Token</h3>
+    <button onclick="cekAdmin()">🔐 Cek Admin Status</button>
+    <div id="adminStatus" class="output-box" style="display:none;"></div>
   </div>
 
+  <script>
+    // Prediksi lokal
+    document.getElementById("local-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const input = document.getElementById("local-input").value;
+      const response = await fetch("/lokal/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ local_input: input })
+      });
+      const data = await response.text();
+      document.getElementById("local-response").innerText = data;
+    });
+
+    // Latih model
+    document.getElementById("train-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const input = document.getElementById("train-input").value;
+      const response = await fetch("/lokal/train", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ train_input: input })
+      });
+      const data = await response.text();
+      document.getElementById("train-response").innerText = data;
+    });
+
+    // Hapus model
+    document.getElementById("delete-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const response = await fetch("/lokal/delete", {
+        method: "POST"
+      });
+      const data = await response.text();
+      document.getElementById("delete-response").innerText = data;
+    });
+
+    // Tampilkan semua data
+    document.getElementById("show-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const response = await fetch("/lokal/show", {
+        method: "GET"
+      });
+      const data = await response.text();
+      document.getElementById("show-response").innerText = data;
+    });
+
+    // Fungsi cek admin
+    async function cekAdmin() {
+      const token = prompt("Masukkan token Supabase:");
+
+      const response = await fetch("/admin/data", {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      const data = await response.json();
+      const box = document.getElementById("adminStatus");
+      box.style.display = "block";
+
+      if (response.ok) {
+        box.innerHTML = `✅ Akses diizinkan<br>Email: ${data.email}<br>Role: ${data.role}`;
+        box.style.backgroundColor = "#1e442f";
+      } else {
+        box.innerHTML = `❌ Gagal: ${data.detail}`;
+        box.style.backgroundColor = "#442222";
+      }
+    }
+  </script>
 </body>
 </html>
