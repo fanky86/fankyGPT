@@ -90,7 +90,7 @@
     <!-- Form Prediksi -->
     <form id="local-form">
       <label for="local-input">Masukkan Pertanyaan:</label>
-      <textarea id="local-input" name="local_input" rows="4"></textarea>
+      <textarea id="local-input" name="input_text" rows="4"></textarea>
       <button type="submit">Kirim</button>
     </form>
     <div id="local-response" class="output-box"></div>
@@ -106,8 +106,8 @@
           <th>📤 Output</th>
         </tr>
         <tr>
-          <td><textarea id="train-input" name="train_input" rows="4" placeholder="Tulis input di sini"></textarea></td>
-          <td><textarea id="train-output" name="train_output" rows="4" placeholder="Tulis output di sini"></textarea></td>
+          <td><textarea id="train-input" name="input_text" rows="4" placeholder="Tulis input di sini"></textarea></td>
+          <td><textarea id="train-output" name="output_text" rows="4" placeholder="Tulis output di sini"></textarea></td>
         </tr>
       </table>
       <button type="submit">Latih</button>
@@ -148,7 +148,7 @@
       const response = await fetch("/lokal/predict", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ local_input: input })
+        body: new URLSearchParams({ input_text: input })
       });
       const data = await response.text();
       document.getElementById("local-response").innerText = data;
@@ -159,12 +159,16 @@
       event.preventDefault();
       const input = document.getElementById("train-input").value;
       const output = document.getElementById("train-output").value;
-      const combined = `${input} => ${output}`;
+
       const response = await fetch("/lokal/train", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ train_input: combined })
+        body: new URLSearchParams({
+          input_text: input,
+          output_text: output
+        })
       });
+
       const data = await response.text();
       document.getElementById("train-response").innerText = data;
     });
