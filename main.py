@@ -10,7 +10,9 @@ from sympy.core.sympify import SympifyError
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 import os, json
-
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from supabase_config import SUPABASE
 
 # Custom imports
 from model_trainer import train_model, predict_input, extract_text_from_url
@@ -36,12 +38,43 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 DATA_FILE = "data/training_data.jsonl"
-@app.get("/admin")
-def get_admin_data(user=Depends(verify_supabase_admin)):
+
+# Middleware agar bisa diakses dari browser
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Sesuaikan jika perlu
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Fungsi verifikasi admin
+def verify_supabase_admin(request: Request):
+    token = request.headers.get("Authorization")
+    if not token:
+        raise HTTPException(status_code=401, detail="Token hilang")
+
+    user = SUPABASE.auth.get_user(token.replace("Bearer ", ""))
+    if not user or not user.user or not user.user.email:
+        raise HTTPException(status_code=401, detail="Token tidak valid")
+
+    user_email = user.user.email
+    result = SUPABASE.table("profiles").select("role").eq("email", user_email).single().execute()
+    
+    if not result.data or result.data["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Bukan admin")
+
     return {
-        "email": user["user"]["email"],
-        "role": user["user"]["role"]
+        "email": user_email,
+        "role": result.data["role"]
     }
+
+# Endpoint /admin yang dipanggil oleh cekAdmin()
+@app.get("/admin")
+async def get_admin_info(request: Request):
+    return verify_supabase_admin(request)
+
+
 # ─────────────────────── STARTUP ─────────────────────── #
 @app.on_event("startup")
 def startup_event():
