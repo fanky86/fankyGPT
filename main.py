@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
-
+from fastapi import Depends
 from model_trainer import train_model, predict_input, extract_text_from_url
 from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
 
@@ -173,7 +173,7 @@ async def download_model():
     return FileResponse(MODEL_FILE, filename="model.pkl")
 
 @app.get("/hapus-data")
-def hapus_data():
+def hapus_data(admin=Depends(verify_supabase_admin)):
     try:
         if os.path.exists("data/training_data.jsonl"):
             os.remove("data/training_data.jsonl")
@@ -182,8 +182,9 @@ def hapus_data():
     except Exception as e:
         return {"status": "error", "message": f"❌ Gagal hapus data: {e}"}
 
+
 @app.get("/hapus-model")
-def hapus_model():
+def hapus_model(admin=Depends(verify_supabase_admin)):
     try:
         if os.path.exists("models/model.pkl"):
             os.remove("models/model.pkl")
