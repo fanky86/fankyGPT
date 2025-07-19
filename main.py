@@ -8,11 +8,10 @@ from supabase_config import get_chat_history, download_model_from_supabase, save
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
-import os, re, uuid
+import os, uuid
 
+# 📦 Load env & init OpenAI client
 load_dotenv()
-
-# Init OpenRouter Client
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("❌ OPENAI_API_KEY belum di-set di environment!")
@@ -28,7 +27,7 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
-# 📦 Download model saat startup jika belum ada
+# 🔄 Startup: download model dari Supabase jika belum ada
 @app.on_event("startup")
 def startup_event():
     if not os.path.exists(MODEL_FILE):
@@ -37,7 +36,7 @@ def startup_event():
         except Exception as e:
             print(f"[Startup Error] Gagal unduh model: {e}")
 
-# 🏠 Halaman utama (chat)
+# 🏠 Halaman utama
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     user_id = request.cookies.get("user_id")
@@ -56,12 +55,12 @@ def index(request: Request):
         "messages": messages
     })
 
-# 🌐 Halaman lokal (manual predict dan training)
+# 🌐 Halaman lokal (prediksi & training manual)
 @app.get("/lokal", response_class=HTMLResponse)
 def lokal_page(request: Request):
     return templates.TemplateResponse("lokal.html", {"request": request})
 
-# 🔁 Chat biasa (dengan reload HTML)
+# 🔁 Chat GPT (HTML response, reload page)
 @app.post("/chat-gpt", response_class=HTMLResponse)
 async def chat_gpt(request: Request):
     form = await request.form()
@@ -90,7 +89,7 @@ async def chat_gpt(request: Request):
     except Exception as e:
         return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi ChatGPT: {e}</p>")
 
-# ⚡ Chat cepat (untuk animasi & fetch JSON)
+# ⚡ Chat GPT versi JSON (untuk fetch AJAX/animasi)
 @app.post("/chat-gpt-json")
 async def chat_gpt_json(request: Request):
     form = await request.form()
@@ -115,13 +114,11 @@ async def chat_gpt_json(request: Request):
     except Exception as e:
         return JSONResponse(content={"reply": f"Gagal menghubungi ChatGPT: {e}"}, status_code=500)
 
-# 🧠 Fungsi hitung ekspresi matematika
+# 🧠 Fungsi bantu: hitung ekspresi matematika
 def hitung_ekspresi(text):
     try:
         hasil = sympify(text).evalf()
-        if hasil == int(hasil):
-            return str(int(hasil))
-        return str(hasil)
+        return str(int(hasil)) if hasil == int(hasil) else str(hasil)
     except (SympifyError, Exception):
         return None
 
@@ -142,13 +139,13 @@ async def predict_local(request: Request, input_text: str = Form(...)):
         "last_input": input_text
     })
 
-# 🧠 Latih model manual
+# ✍️ Latih lokal manual
 @app.post("/lokal/train")
 async def train_local(request: Request, input_text: str = Form(...), output_text: str = Form(...)):
     train_model(input_text, output_text)
     return RedirectResponse("/lokal", status_code=302)
 
-# 🌐 Latih dari URL
+# 🌐 Latih model dari URL
 @app.post("/lokal/train-url", response_class=HTMLResponse)
 async def train_from_url_local(request: Request):
     data = await request.form()
@@ -161,7 +158,7 @@ async def train_from_url_local(request: Request):
     train_model("artikel", text.strip())
     return HTMLResponse("<p style='color:green;'>✅ Model berhasil dilatih dari URL!</p>")
 
-# 👁️ Preview URL
+# 👁️ Preview isi URL
 @app.post("/lokal/preview-url", response_class=HTMLResponse)
 async def preview_url_local(request: Request):
     data = await request.form()
@@ -172,7 +169,7 @@ async def preview_url_local(request: Request):
     preview = f"<h3>📄 Teks dari URL:</h3><pre>{text}</pre>"
     return HTMLResponse(preview)
 
-# ⬇️ Unduh model
+# 📥 Unduh model
 @app.get("/download-model")
 async def download_model():
     return FileResponse(MODEL_FILE, filename="model.pkl")
@@ -192,8 +189,8 @@ def hapus_data():
 @app.get("/hapus-model")
 def hapus_model():
     try:
-        if os.path.exists("models/model.pkl"):
-            os.remove("models/model.pkl")
+        if os.path.exists(MODEL_FILE):
+            os.remove(MODEL_FILE)
             return {"status": "success", "message": "✅ Model dihapus."}
         return {"status": "not_found", "message": "⚠️ Model belum ada."}
     except Exception as e:
