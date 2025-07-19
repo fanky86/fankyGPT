@@ -11,21 +11,21 @@
     html, body {
       margin: 0;
       padding: 0;
+      height: 100%;
       font-family: Arial, sans-serif;
       background-color: #000;
       color: #fff;
-      height: 100%;
     }
 
     body {
       display: flex;
       flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
     }
 
     header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -34,6 +34,27 @@
       font-size: 1.2rem;
       font-weight: bold;
       border-bottom: 1px solid #333;
+      z-index: 10;
+    }
+
+    .back-button {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+    }
+
+    .back-button a {
+      display: inline-block;
+      padding: 4px 8px;
+      color: #fff;
+      background-color: #333;
+      border-radius: 4px;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .back-button a:hover {
+      background-color: #444;
     }
 
     .profile {
@@ -56,12 +77,14 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 100%;
-      margin: 0 auto;
+      overflow: hidden;
     }
 
     @media (min-width: 768px) {
-      .content-wrapper { max-width: 50%; }
+      .content-wrapper {
+        max-width: 50%;
+        margin: 0 auto;
+      }
     }
 
     .chat-container {
@@ -99,6 +122,9 @@
       padding: 1rem;
       background-color: #222;
       border-top: 1px solid #333;
+      position: sticky;
+      bottom: 0;
+      z-index: 9;
     }
 
     input[type="text"] {
@@ -128,25 +154,14 @@
     button:hover {
       background-color: #2e7d32;
     }
-
-    .link-lokal {
-      text-align: center;
-      padding: 1rem;
-    }
-
-    .link-lokal a {
-      color: #4caf50;
-      text-decoration: none;
-    }
-
-    .link-lokal a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
 
   <header>
+    <div class="back-button">
+      <a href="/lokal">←</a>
+    </div>
     🧠 FankyGPT Chat
     <div class="profile">
       <img src="/static/favicon.png" alt="Profile">
@@ -164,16 +179,11 @@
         <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
       {% endif %}
     </div>
-    
+
     <form method="post" action="/chat-gpt">
-      <input type="text" name="message" placeholder="Tanya sesuatu..." required autofocus autocomplete="off">
+      <input type="text" name="message" placeholder="Tanya sesuatu..." required autocomplete="off">
       <button type="submit">Kirim</button>
     </form>
-
-    <div class="link-lokal">
-      <hr style="border: 0; border-top: 1px solid #444;">
-      <a href="/lokal">🔁 Pindah ke Mode Lokal</a>
-    </div>
   </div>
 
   <script>
