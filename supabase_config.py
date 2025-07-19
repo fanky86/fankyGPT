@@ -2,18 +2,19 @@ from dotenv import load_dotenv
 from supabase import create_client
 from datetime import datetime
 import os
-import uuid  # Bisa dipakai jika perlu ID unik secara eksplisit
+import uuid
 
+# Load variabel lingkungan dari .env
 load_dotenv()
 
-# Ambil URL dan KEY dari environment variable
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 BUCKET_NAME = "model-bucket"
 
-# Inisialisasi Supabase client
+# Inisialisasi client Supabase
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# ──────────────── Upload / Download Model ──────────────── #
 def upload_to_supabase(file_path):
     """Upload file model ke Supabase Storage"""
     try:
@@ -38,8 +39,9 @@ def download_model_from_supabase(file_path):
     except Exception as e:
         print(f"[✖] Gagal download dari Supabase: {e}")
 
+# ──────────────── Chat Logs (user ↔ bot) ──────────────── #
 def save_chat_to_supabase(user_input, response_text, user_id):
-    """Simpan obrolan ke Supabase dengan user_id"""
+    """Simpan obrolan ke Supabase"""
     try:
         data = {
             "user_id": user_id,
@@ -53,7 +55,7 @@ def save_chat_to_supabase(user_input, response_text, user_id):
         print(f"[✖] Gagal simpan obrolan ke Supabase: {e}")
 
 def get_memory(user_id):
-    """Ambil seluruh riwayat obrolan berdasarkan user_id"""
+    """Ambil riwayat obrolan dari Supabase berdasarkan user_id"""
     try:
         response = (
             supabase.table("chat_logs")
@@ -62,10 +64,8 @@ def get_memory(user_id):
             .order("timestamp", desc=False)
             .execute()
         )
-
         chat_data = response.data
-        messages = [{"user": item["input"], "bot": item["output"]} for item in chat_data]
-        return messages
+        return [{"user": item["input"], "bot": item["output"]} for item in chat_data]
     except Exception as e:
         print(f"[✖] Gagal ambil riwayat chat dari Supabase: {e}")
         return []
