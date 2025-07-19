@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>FankyGPT Chat</title>
+  <title>🧠 FankyGPT Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="/static/favicon.png" type="image/png">
   <style>
@@ -25,9 +25,10 @@
     header {
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000;
       display: flex;
       align-items: center;
+      justify-content: center;
       background-color: #222;
       padding: 1rem;
       font-size: 1.2rem;
@@ -35,17 +36,19 @@
       border-bottom: 1px solid #333;
     }
 
-    .back-button {
+    .back-btn {
+      position: absolute;
+      left: 1rem;
+      font-size: 1.4rem;
       background: none;
       border: none;
       color: white;
-      font-size: 1.4rem;
-      margin-right: 1rem;
       cursor: pointer;
     }
 
     .profile {
-      margin-left: auto;
+      position: absolute;
+      right: 1rem;
       width: 32px;
       height: 32px;
       border-radius: 50%;
@@ -67,7 +70,9 @@
     }
 
     @media (min-width: 768px) {
-      .content-wrapper { max-width: 50%; }
+      .content-wrapper {
+        max-width: 600px;
+      }
     }
 
     .chat-container {
@@ -77,6 +82,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      background-color: #000;
     }
 
     .bubble {
@@ -98,52 +104,51 @@
       background-color: #333;
     }
 
-    .chat-form {
+    form {
       display: flex;
       align-items: center;
-      padding: 0.5rem 1rem;
+      gap: 8px;
+      padding: 0.7rem 1rem;
       background-color: #222;
       border-top: 1px solid #333;
     }
 
-    .chat-form input[type="text"] {
+    input[type="text"] {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       font-size: 1rem;
-      border: 1px solid #444;
-      border-radius: 5px;
-      margin-right: 10px;
+      border: none;
+      border-radius: 20px;
       background-color: #333;
       color: #fff;
     }
 
-    .chat-form input::placeholder {
+    input[type="text"]::placeholder {
       color: #aaa;
     }
 
-    .send {
-      background-color: #25d366;
+    button {
+      background-color: #4caf50;
       border: none;
-      color: white;
-      font-size: 1.4rem;
-      padding: 0.6rem 0.8rem;
+      padding: 10px 14px;
       border-radius: 50%;
       cursor: pointer;
     }
 
-    .send:hover {
-      background-color: #1ebf57;
+    button img {
+      width: 20px;
+      height: 20px;
     }
 
-    #chat-box {
-      transition: padding-bottom 0.2s ease;
+    .link-lokal {
+      display: none;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <button class="back-button" onclick="location.href='/lokal'">←</button>
+    <button class="back-btn" onclick="window.location.href='/lokal'">←</button>
     🧠 FankyGPT Chat
     <div class="profile">
       <img src="/static/favicon.png" alt="Profile">
@@ -152,65 +157,27 @@
 
   <div class="content-wrapper">
     <div class="chat-container" id="chat-box">
-      <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
+          <div class="bubble bot"><strong>FankyGPT:</strong> {{ msg.bot }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
+      {% endif %}
     </div>
 
-    <form class="chat-form" onsubmit="sendMessage(event)">
-      <input id="messageInput" type="text" name="message" placeholder="Tanya sesuatu..." required autocomplete="off">
-      <button class="send" type="submit">➤</button>
+    <form method="post" action="/chat-gpt">
+      <input type="text" name="message" placeholder="Tanya sesuatu..." required autocomplete="off">
+      <button type="submit">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/filled-sent.png" alt="Kirim">
+      </button>
     </form>
   </div>
 
   <script>
     const chatBox = document.getElementById('chat-box');
-    const input = document.getElementById('messageInput');
-
-    function appendBubble(content, className = 'bot') {
-      const bubble = document.createElement('div');
-      bubble.className = `bubble ${className}`;
-      bubble.innerHTML = content;
-      chatBox.appendChild(bubble);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    async function sendMessage(event) {
-      event.preventDefault();
-
-      const message = input.value.trim();
-      if (!message) return;
-
-      // Tampilkan pesan user langsung
-      appendBubble(`<strong>Kamu:</strong> ${message}`, 'user');
-      input.value = '';
-
-      // Tampilkan animasi ngetik
-      const typingBubble = document.createElement('div');
-      typingBubble.className = 'bubble bot';
-      typingBubble.id = 'typing';
-      typingBubble.innerText = 'FankyGPT sedang mengetik...';
-      chatBox.appendChild(typingBubble);
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      // Kirim ke backend
-      try {
-        const res = await fetch('/chat-gpt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `message=${encodeURIComponent(message)}`
-        });
-        const data = await res.text();
-
-        // Ganti animasi jadi respon
-        typingBubble.remove();
-        appendBubble(`<strong>FankyGPT:</strong> ${data}`, 'bot');
-      } catch (e) {
-        typingBubble.remove();
-        appendBubble('<strong>FankyGPT:</strong> Maaf, terjadi kesalahan.', 'bot');
-      }
-    }
-
-    // Fokus ke input saat halaman dibuka
-    window.onload = () => input.focus();
+    chatBox.scrollTop = chatBox.scrollHeight;
   </script>
 
 </body>
