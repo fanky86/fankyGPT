@@ -217,7 +217,7 @@
   function addMessage(type, text) {
     const div = document.createElement('div');
     div.className = 'bubble ' + type;
-    div.innerHTML = `<strong>${type === 'user' ? 'Kamu' : 'FankyGPT'}:</strong> ${text}`;
+    div.innerHTML = `${text}`;
     chatBox.appendChild(div);
     scrollToBottom();
   }
@@ -226,7 +226,7 @@
     const div = document.createElement('div');
     div.className = 'typing-indicator';
     div.id = 'typing-indicator';
-    div.innerHTML = `<strong></strong> <span></span><span></span><span></span>`;
+    div.innerHTML = `<span></span><span></span><span></span>`;
     chatBox.appendChild(div);
     scrollToBottom();
   }
@@ -241,7 +241,7 @@
     let i = 0;
     const div = document.createElement('div');
     div.className = 'bubble bot';
-    div.innerHTML = `<strong></strong> <span id="typing"></span>`;
+    div.innerHTML = `<span id="typing"></span>`;
     chatBox.appendChild(div);
     const typing = div.querySelector('#typing');
 
