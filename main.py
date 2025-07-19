@@ -1,21 +1,23 @@
+import os, uuid
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from model_trainer import train_model, predict_input, extract_text_from_url
-from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
-from dotenv import load_dotenv
-import os, uuid
 
-# Load env
+from model_trainer import train_model, predict_input, extract_text_from_url
+from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
+
+# Load environment variables
 load_dotenv()
 
-# Setup OpenAI client langsung
+# Setup OpenAI client
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1", 
-    api_key=os.getenv("OPENAI_API_KEY") 
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENAI_API_KEY")
 )
 
 app = FastAPI()
@@ -24,6 +26,7 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
+# ─────────────────────── STARTUP ─────────────────────── #
 @app.on_event("startup")
 def startup_event():
     if not os.path.exists(MODEL_FILE):
@@ -32,7 +35,7 @@ def startup_event():
         except Exception as e:
             print(f"[Startup Error] Gagal unduh model: {e}")
 
-# Middleware untuk assign user_id
+# ─────────────────────── MIDDLEWARE ─────────────────────── #
 @app.middleware("http")
 async def assign_user_id(request: Request, call_next):
     user_id = request.cookies.get("user_id")
@@ -44,6 +47,7 @@ async def assign_user_id(request: Request, call_next):
     else:
         return await call_next(request)
 
+# ─────────────────────── ROUTES ─────────────────────── #
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     user_id = request.cookies.get("user_id")
@@ -96,19 +100,16 @@ async def chat_gpt_json(request: Request):
         )
         reply = response.choices[0].message.content.strip()
 
-        # Simpan ke Supabase jika ada user_id
         if user_id:
             save_chat_to_supabase(user_input, reply, user_id)
 
-        # Latih model lokal
         train_model(user_input, reply)
 
         return {"reply": reply}
-
     except Exception as e:
         return {"reply": f"❌ Gagal: {e}"}
 
-# Hitung ekspresi matematika jika bisa
+# ─────────────────────── MATEMATIKA ─────────────────────── #
 def hitung_ekspresi(text):
     try:
         hasil = sympify(text).evalf()
@@ -118,7 +119,6 @@ def hitung_ekspresi(text):
 
 @app.post("/lokal/predict")
 async def predict_local(request: Request, input_text: str = Form(...)):
-    # 1. Coba evaluasi apakah input adalah ekspresi matematika
     hasil_matematika = hitung_ekspresi(input_text)
     if hasil_matematika:
         return templates.TemplateResponse("lokal.html", {
@@ -127,28 +127,20 @@ async def predict_local(request: Request, input_text: str = Form(...)):
             "last_input": input_text
         })
 
-    # 2. Coba prediksi dari model lokal yang sudah dilatih (baik manual maupun dari URL)
     try:
         result = predict_input(input_text)
-        if result:
-            return templates.TemplateResponse("lokal.html", {
-                "request": request,
-                "response": result,
-                "last_input": input_text
-            })
-        else:
-            return templates.TemplateResponse("lokal.html", {
-                "request": request,
-                "response": "❌ Model tidak memberikan prediksi.",
-                "last_input": input_text
-            })
+        return templates.TemplateResponse("lokal.html", {
+            "request": request,
+            "response": result or "❌ Model tidak memberikan prediksi.",
+            "last_input": input_text
+        })
     except Exception as e:
         return templates.TemplateResponse("lokal.html", {
             "request": request,
             "response": f"❌ Terjadi kesalahan saat prediksi: {str(e)}",
             "last_input": input_text
         })
-        
+
 @app.post("/lokal/train")
 async def train_local(request: Request, input_text: str = Form(...), output_text: str = Form(...)):
     train_model(input_text, output_text)
@@ -185,21 +177,6 @@ def hapus_data():
     try:
         if os.path.exists("data/training_data.jsonl"):
             os.remove("data/training_data.jsonl")
-            return {"status": "success", "message": "✅ Data training dihapus."}
-        return {"status": "not_found", "message": "⚠️ File data tidak ditemukan."}
-    except Exception as e:
-        return {"status": "error", "message": f"❌ Gagal hapus data: {e}"}
-
-@app.get("/hapus-model")
-def hapus_model():
-    try:
-        if os.path.exists("models/model.pkl"):
-            os.remove("models/model.pkl")
-            return {"status": "success", "message": "✅ Model dihapus."}
-        return {"status": "not_found", "message": "⚠️ Model belum ada."}
-    except Exception as e:
-        return {"status": "error", "message": f"❌ Gagal hapus model: {e}"}
-ata.jsonl")
             return {"status": "success", "message": "✅ Data training dihapus."}
         return {"status": "not_found", "message": "⚠️ File data tidak ditemukan."}
     except Exception as e:
