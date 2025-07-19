@@ -20,21 +20,18 @@
     body {
       display: flex;
       flex-direction: column;
-      height: 100vh;
       overflow: hidden;
     }
 
     header {
+      flex-shrink: 0;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background-color: #222;
       padding: 1rem;
+      text-align: center;
       font-size: 1.2rem;
       font-weight: bold;
       border-bottom: 1px solid #333;
-      z-index: 10;
     }
 
     .back-button {
@@ -46,15 +43,11 @@
     .back-button a {
       display: inline-block;
       padding: 4px 8px;
-      color: #fff;
       background-color: #333;
+      color: #fff;
       border-radius: 4px;
-      font-size: 14px;
       text-decoration: none;
-    }
-
-    .back-button a:hover {
-      background-color: #444;
+      font-size: 14px;
     }
 
     .profile {
@@ -80,13 +73,6 @@
       overflow: hidden;
     }
 
-    @media (min-width: 768px) {
-      .content-wrapper {
-        max-width: 50%;
-        margin: 0 auto;
-      }
-    }
-
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -94,7 +80,6 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background-color: #000;
     }
 
     .bubble {
@@ -116,19 +101,17 @@
       background-color: #333;
     }
 
-    form {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 1rem;
+    .input-area {
+      flex-shrink: 0;
+      padding: 10px;
       background-color: #222;
       border-top: 1px solid #333;
-      position: sticky;
-      bottom: 0;
-      z-index: 9;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
-    input[type="text"] {
+    .input-area input[type="text"] {
       flex: 1;
       padding: 10px;
       font-size: 1rem;
@@ -138,39 +121,40 @@
       color: #fff;
     }
 
-    input[type="text"]::placeholder {
+    .input-area input::placeholder {
       color: #aaa;
     }
 
-    button {
+    .input-area button {
       width: 42px;
       height: 42px;
       border: none;
       border-radius: 50%;
-      background-color: #25d366; /* Warna khas WhatsApp */
+      background-color: #25d366;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #1da851;
-    }
-
-    button svg {
+    .input-area button svg {
       width: 20px;
       height: 20px;
       fill: white;
+    }
+
+    @media (min-width: 768px) {
+      .content-wrapper {
+        max-width: 50%;
+        margin: 0 auto;
+      }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="back-button">
-      <a href="/lokal">←</a>
-    </div>
+    <div class="back-button"><a href="/lokal">←</a></div>
     🧠 FankyGPT Chat
     <div class="profile">
       <img src="/static/favicon.png" alt="Profile">
@@ -189,12 +173,10 @@
       {% endif %}
     </div>
 
-    <form method="post" action="/chat-gpt">
+    <form method="post" action="/chat-gpt" class="input-area">
       <input type="text" name="message" placeholder="Tanya sesuatu..." required autocomplete="off">
       <button type="submit">
-        <svg viewBox="0 0 24 24">
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
     </form>
   </div>
