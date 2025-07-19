@@ -3,12 +3,12 @@ from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from model_trainer import train_model, predict_input, extract_text_from_url
-from supabase_config import download_model_from_supabase, save_chat_to_supabase
+from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
 from dotenv import load_dotenv
-import os
+import os, uuid
 
 # Load env
 load_dotenv()
@@ -33,9 +33,26 @@ def startup_event():
         except Exception as e:
             print(f"[Startup Error] Gagal unduh model: {e}")
 
+# Middleware untuk assign user_id
+@app.middleware("http")
+async def assign_user_id(request: Request, call_next):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        user_id = str(uuid.uuid4())
+        response = await call_next(request)
+        response.set_cookie("user_id", user_id)
+        return response
+    else:
+        return await call_next(request)
+
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    user_id = request.cookies.get("user_id")
+    chat_history = get_memory(user_id) if user_id else []
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "messages": chat_history
+    })
 
 @app.get("/lokal", response_class=HTMLResponse)
 def lokal_page(request: Request):
@@ -45,10 +62,11 @@ def lokal_page(request: Request):
 async def chat_gpt(request: Request):
     form = await request.form()
     user_input = form.get("message")
+    user_id = request.cookies.get("user_id")
 
     try:
         response = client.chat.completions.create(
-            model="mistralai/mistral-7b-instruct",  # ganti model OpenRouter gratis
+            model="mistralai/mistral-7b-instruct",
             messages=[
                 {"role": "system", "content": "Kamu adalah FankyGPT, asisten cerdas dan cepat."},
                 {"role": "user", "content": user_input}
@@ -56,14 +74,18 @@ async def chat_gpt(request: Request):
         )
         reply = response.choices[0].message.content.strip()
 
-        # Simpan dan latih
-        save_chat_to_supabase(user_input, reply)
+        # Simpan ke Supabase
+        if user_id:
+            save_chat_to_supabase(user_input, reply, user_id)
+
         train_model(user_input, reply)
 
+        chat_history = get_memory(user_id) if user_id else []
         return templates.TemplateResponse("index.html", {
             "request": request,
             "chat_input": user_input,
-            "chat_response": reply
+            "chat_response": reply,
+            "messages": chat_history
         })
 
     except Exception as e:
@@ -73,9 +95,7 @@ async def chat_gpt(request: Request):
 def hitung_ekspresi(text):
     try:
         hasil = sympify(text).evalf()
-        if hasil == int(hasil):
-            return str(int(hasil))
-        return str(hasil)
+        return str(int(hasil)) if hasil == int(hasil) else str(hasil)
     except (SympifyError, Exception):
         return None
 
