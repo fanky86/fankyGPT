@@ -8,7 +8,6 @@ from sklearn.naive_bayes import MultinomialNB
 DATA_FILE = "data/training_data.jsonl"
 MODEL_FILE = "models/model.pkl"
 
-# ──────────────── Data Management ──────────────── #
 def save_training_data(input_text, output_text):
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     with open(DATA_FILE, "a", encoding="utf-8") as f:
@@ -25,27 +24,21 @@ def load_training_data():
             y.append(item["output"])
     return X, y
 
-# ──────────────── Training Model ──────────────── #
 def train_model(input_text=None, output_text=None):
     if input_text and output_text:
         save_training_data(input_text, output_text)
-    
     X, y = load_training_data()
     if not X or not y:
         raise ValueError("❌ Tidak ada data untuk melatih model.")
-
     vectorizer = CountVectorizer()
     X_vectorized = vectorizer.fit_transform(X)
     model = MultinomialNB()
     model.fit(X_vectorized, y)
-
     os.makedirs(os.path.dirname(MODEL_FILE), exist_ok=True)
     with open(MODEL_FILE, "wb") as f:
         pickle.dump((model, vectorizer), f)
-
     upload_to_supabase(MODEL_FILE)
 
-# ──────────────── Prediksi & Matematika ──────────────── #
 def is_math_expression(text):
     allowed = r'^[\d\s\+\-\*/\%\.\(\)\[\]\,eEpiqrtlogsincoatanraddeg\^]+$'
     return re.match(allowed, text.replace('**', '^')) is not None
@@ -76,22 +69,18 @@ def predict_input(input_text):
             return str(safe_eval_math(input_text))
         if not os.path.exists(MODEL_FILE):
             return "⚠️ Model belum tersedia. Latih terlebih dahulu."
-
         with open(MODEL_FILE, "rb") as f:
             model, vectorizer = pickle.load(f)
-
         return model.predict(vectorizer.transform([clean_text(input_text)]))[0]
     except Exception as e:
         return f"❌ Gagal prediksi: {e}"
 
-# ──────────────── Auto-train dari Chat 🔄────────────── #
 def train_from_chat(user_input, bot_reply):
     try:
         train_model(user_input, bot_reply)
     except Exception as e:
         print(f"[Auto-train Error] {e}")
 
-# ──────────────── Ekstrak Artikel dari URL ──────────────── #
 def extract_text_from_url(url):
     try:
         r = requests.get(url, timeout=10)
