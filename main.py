@@ -32,7 +32,7 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
-@app.get("/admin/data")
+@app.get("/admin")
 def get_admin_data(user=Depends(verify_supabase_admin)):
     return {
         "email": user["user"]["email"],
