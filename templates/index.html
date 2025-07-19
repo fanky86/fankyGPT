@@ -192,7 +192,7 @@
     {% if messages %}
       {% for msg in messages %}
         <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
-        <div class="bubble bot"><strong>FankyGPT:</strong> {{ msg.bot }}</div>
+        <div class="bubble bot"><strong></strong> {{ msg.bot }}</div>
       {% endfor %}
     {% else %}
       <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
@@ -226,7 +226,7 @@
     const div = document.createElement('div');
     div.className = 'typing-indicator';
     div.id = 'typing-indicator';
-    div.innerHTML = `<strong>FankyGPT:</strong> <span></span><span></span><span></span>`;
+    div.innerHTML = `<strong></strong> <span></span><span></span><span></span>`;
     chatBox.appendChild(div);
     scrollToBottom();
   }
