@@ -157,22 +157,37 @@
     // Fungsi cek admin
     async function cekAdmin() {
       const token = prompt("Masukkan token Supabase:");
-
-      const response = await fetch("/admin/data", {
-        headers: {
-          "Authorization": "Bearer " + token
-        }
-      });
-
-      const data = await response.json();
       const box = document.getElementById("adminStatus");
       box.style.display = "block";
 
-      if (response.ok) {
-        box.innerHTML = `✅ Akses diizinkan<br>Email: ${data.email}<br>Role: ${data.role}`;
-        box.style.backgroundColor = "#1e442f";
-      } else {
-        box.innerHTML = `❌ Gagal: ${data.detail}`;
+      if (!token) {
+        box.innerHTML = `❌ Token tidak dimasukkan`;
+        box.style.backgroundColor = "#442222";
+        return;
+      }
+
+      try {
+        const response = await fetch("/admin/data", {
+          headers: {
+            "Authorization": "Bearer " + token
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          box.innerHTML = `
+            ✅ Akses diizinkan<br>
+            <strong>Email:</strong> ${data.email}<br>
+            <strong>Role:</strong> ${data.role}
+          `;
+          box.style.backgroundColor = "#1e442f";
+        } else {
+          box.innerHTML = `❌ Gagal: ${data.detail || "Terjadi kesalahan"}`;
+          box.style.backgroundColor = "#442222";
+        }
+      } catch (err) {
+        box.innerHTML = `❌ Gagal koneksi ke server`;
         box.style.backgroundColor = "#442222";
       }
     }
