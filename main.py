@@ -15,7 +15,8 @@ load_dotenv()
 
 # Setup OpenAI client langsung
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+    base_url="https://openrouter.ai/api/v1", 
+    api_key=os.getenv("OPENAI_API_KEY") 
 )
 
 app = FastAPI()
@@ -63,7 +64,7 @@ async def chat_gpt(request: Request):
     user_input = form.get("message")
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="mistralai/mixtral-8x7b-instruct",  # Ganti model ke Mixtral via OpenRouter
             messages=[
                 {"role": "system", "content": "Kamu adalah asisten cerdas bernama FankyGPT."},
                 {"role": "user", "content": user_input}
@@ -78,7 +79,8 @@ async def chat_gpt(request: Request):
             "chat_response": reply
         })
     except Exception as e:
-        return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi ChatGPT: {e}</p>")
+        return HTMLResponse(f"<p style='color:red;'>Gagal menghubungi FankyGPT via OpenRouter: {e}</p>")
+
 
 @app.post("/chat-gpt-json")
 async def chat_gpt_json(request: Request):
