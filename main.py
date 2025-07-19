@@ -1,20 +1,22 @@
 import os, uuid
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
-from fastapi import Depends
+
+# Custom imports
 from model_trainer import train_model, predict_input, extract_text_from_url
 from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
 from admin import verify_supabase_admin
-# Load environment variables
+
+# Load environment
 load_dotenv()
 
-# Setup OpenAI client
+# Setup OpenAI
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENAI_API_KEY")
@@ -44,10 +46,10 @@ async def assign_user_id(request: Request, call_next):
         response = await call_next(request)
         response.set_cookie("user_id", user_id)
         return response
-    else:
-        return await call_next(request)
+    return await call_next(request)
 
 # ─────────────────────── ROUTES ─────────────────────── #
+
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     user_id = request.cookies.get("user_id")
@@ -109,7 +111,8 @@ async def chat_gpt_json(request: Request):
     except Exception as e:
         return {"reply": f"❌ Gagal: {e}"}
 
-# ─────────────────────── MATEMATIKA ─────────────────────── #
+# ─────────────────────── MATEMATIKA & LOKAL MODEL ─────────────────────── #
+
 def hitung_ekspresi(text):
     try:
         hasil = sympify(text).evalf()
@@ -168,6 +171,8 @@ async def preview_url_local(request: Request):
     preview = f"<h3>📄 Teks dari URL:</h3><pre>{text}</pre>"
     return HTMLResponse(preview)
 
+# ─────────────────────── FILE HANDLING ─────────────────────── #
+
 @app.get("/download-model")
 async def download_model():
     return FileResponse(MODEL_FILE, filename="model.pkl")
@@ -182,12 +187,11 @@ def hapus_data(admin=Depends(verify_supabase_admin)):
     except Exception as e:
         return {"status": "error", "message": f"❌ Gagal hapus data: {e}"}
 
-
 @app.get("/hapus-model")
 def hapus_model(admin=Depends(verify_supabase_admin)):
     try:
-        if os.path.exists("models/model.pkl"):
-            os.remove("models/model.pkl")
+        if os.path.exists(MODEL_FILE):
+            os.remove(MODEL_FILE)
             return {"status": "success", "message": "✅ Model dihapus."}
         return {"status": "not_found", "message": "⚠️ Model belum ada."}
     except Exception as e:
