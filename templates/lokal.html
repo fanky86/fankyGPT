@@ -61,12 +61,33 @@
     h1, h2, h3 {
       color: #58a6ff;
     }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      vertical-align: top;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px;
+      color: #58a6ff;
+    }
+
+    td {
+      padding: 8px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>FankyGPT Lokal</h1>
     <h2>Model Lokal</h2>
+
+    <!-- Form Prediksi -->
     <form id="local-form">
       <label for="local-input">Masukkan Pertanyaan:</label>
       <textarea id="local-input" name="local_input" rows="4"></textarea>
@@ -76,16 +97,26 @@
 
     <hr>
 
+    <!-- Form Latih Model -->
     <h3>🎓 Latih Model</h3>
     <form id="train-form">
-      <label for="train-input">Input Data Latih (format: "input => output"):</label>
-      <textarea id="train-input" name="train_input" rows="4"></textarea>
+      <table>
+        <tr>
+          <th>📝 Input</th>
+          <th>📤 Output</th>
+        </tr>
+        <tr>
+          <td><textarea id="train-input" name="train_input" rows="4" placeholder="Tulis input di sini"></textarea></td>
+          <td><textarea id="train-output" name="train_output" rows="4" placeholder="Tulis output di sini"></textarea></td>
+        </tr>
+      </table>
       <button type="submit">Latih</button>
     </form>
     <div id="train-response" class="output-box"></div>
 
     <hr>
 
+    <!-- Form Hapus Model -->
     <h3>🧹 Hapus Model</h3>
     <form id="delete-form">
       <button type="submit">Hapus Semua Data Model</button>
@@ -94,6 +125,7 @@
 
     <hr>
 
+    <!-- Form Tampilkan Data -->
     <h3>📚 Lihat Data Model</h3>
     <form id="show-form">
       <button type="submit">Tampilkan Semua Data</button>
@@ -102,6 +134,7 @@
 
     <hr>
 
+    <!-- Tombol Cek Admin -->
     <h3>🛡️ Cek Admin Token</h3>
     <button onclick="cekAdmin()">🔐 Cek Admin Status</button>
     <div id="adminStatus" class="output-box" style="display:none;"></div>
@@ -109,7 +142,7 @@
 
   <script>
     // Prediksi lokal
-    document.getElementById("local-form").addEventListener("submit", async function(event) {
+    document.getElementById("local-form").addEventListener("submit", async function (event) {
       event.preventDefault();
       const input = document.getElementById("local-input").value;
       const response = await fetch("/lokal/predict", {
@@ -122,20 +155,22 @@
     });
 
     // Latih model
-    document.getElementById("train-form").addEventListener("submit", async function(event) {
+    document.getElementById("train-form").addEventListener("submit", async function (event) {
       event.preventDefault();
       const input = document.getElementById("train-input").value;
+      const output = document.getElementById("train-output").value;
+      const combined = `${input} => ${output}`;
       const response = await fetch("/lokal/train", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ train_input: input })
+        body: new URLSearchParams({ train_input: combined })
       });
       const data = await response.text();
       document.getElementById("train-response").innerText = data;
     });
 
     // Hapus model
-    document.getElementById("delete-form").addEventListener("submit", async function(event) {
+    document.getElementById("delete-form").addEventListener("submit", async function (event) {
       event.preventDefault();
       const response = await fetch("/lokal/delete", {
         method: "POST"
@@ -144,8 +179,8 @@
       document.getElementById("delete-response").innerText = data;
     });
 
-    // Tampilkan semua data
-    document.getElementById("show-form").addEventListener("submit", async function(event) {
+    // Tampilkan data model
+    document.getElementById("show-form").addEventListener("submit", async function (event) {
       event.preventDefault();
       const response = await fetch("/lokal/show", {
         method: "GET"
