@@ -191,7 +191,7 @@
   <div class="chat-container" id="chat-box">
     {% if messages %}
       {% for msg in messages %}
-        <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
+        <div class="bubble user"><strong></strong> {{ msg.user }}</div>
         <div class="bubble bot"><strong></strong> {{ msg.bot }}</div>
       {% endfor %}
     {% else %}
@@ -241,7 +241,7 @@
     let i = 0;
     const div = document.createElement('div');
     div.className = 'bubble bot';
-    div.innerHTML = `<strong>FankyGPT:</strong> <span id="typing"></span>`;
+    div.innerHTML = `<strong></strong> <span id="typing"></span>`;
     chatBox.appendChild(div);
     const typing = div.querySelector('#typing');
 
