@@ -11,14 +11,14 @@ MODEL_FILE = "models/model.pkl"
 # ──────────────── Data Management ──────────────── #
 def save_training_data(input_text, output_text):
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    with open(DATA_FILE, "a") as f:
+    with open(DATA_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps({"input": input_text, "output": output_text}) + "\n")
 
 def load_training_data():
     if not os.path.exists(DATA_FILE):
         return [], []
     X, y = [], []
-    with open(DATA_FILE) as f:
+    with open(DATA_FILE, encoding="utf-8") as f:
         for line in f:
             item = json.loads(line)
             X.append(clean_text(item["input"]))
@@ -26,21 +26,27 @@ def load_training_data():
     return X, y
 
 # ──────────────── Training Model ──────────────── #
-def train_model(input_text, output_text):
-    save_training_data(input_text, output_text)
+def train_model(input_text=None, output_text=None):
+    if input_text and output_text:
+        save_training_data(input_text, output_text)
+    
     X, y = load_training_data()
+    if not X or not y:
+        raise ValueError("❌ Tidak ada data untuk melatih model.")
+
     vectorizer = CountVectorizer()
     X_vectorized = vectorizer.fit_transform(X)
     model = MultinomialNB()
     model.fit(X_vectorized, y)
+
     os.makedirs(os.path.dirname(MODEL_FILE), exist_ok=True)
     with open(MODEL_FILE, "wb") as f:
         pickle.dump((model, vectorizer), f)
+
     upload_to_supabase(MODEL_FILE)
 
-# ──────────────── Prediksi dengan Model & Matematika ──────────────── #
+# ──────────────── Prediksi & Matematika ──────────────── #
 def is_math_expression(text):
-    # Deteksi apakah input adalah ekspresi matematika (hanya karakter valid)
     allowed = r'^[\d\s\+\-\*/\%\.\(\)\[\]\,eEpiqrtlogsincoatanraddeg\^]+$'
     return re.match(allowed, text.replace('**', '^')) is not None
 
@@ -68,11 +74,22 @@ def predict_input(input_text):
     try:
         if is_math_expression(input_text):
             return str(safe_eval_math(input_text))
+        if not os.path.exists(MODEL_FILE):
+            return "⚠️ Model belum tersedia. Latih terlebih dahulu."
+
         with open(MODEL_FILE, "rb") as f:
             model, vectorizer = pickle.load(f)
+
         return model.predict(vectorizer.transform([clean_text(input_text)]))[0]
     except Exception as e:
-        return f"Model belum dilatih: {e}"
+        return f"❌ Gagal prediksi: {e}"
+
+# ──────────────── Auto-train dari Chat 🔄────────────── #
+def train_from_chat(user_input, bot_reply):
+    try:
+        train_model(user_input, bot_reply)
+    except Exception as e:
+        print(f"[Auto-train Error] {e}")
 
 # ──────────────── Ekstrak Artikel dari URL ──────────────── #
 def extract_text_from_url(url):
