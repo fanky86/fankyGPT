@@ -32,9 +32,12 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
-@admin_router.get("/admin/data")
+@app.get("/admin/data")
 def get_admin_data(user=Depends(verify_supabase_admin)):
-    return {"message": f"Halo admin {user.user.email}!"}
+    return {
+        "email": user["user"]["email"],
+        "role": user["user"]["role"]
+    }
 # ─────────────────────── STARTUP ─────────────────────── #
 @app.on_event("startup")
 def startup_event():
