@@ -121,7 +121,7 @@
     // Hapus model
     document.getElementById("delete-form").addEventListener("submit", async function (event) {
       event.preventDefault();
-      const response = await fetch("/lokal/delete", { method: "POST" });
+      const response = await fetch("/lokal/hapus-model", { method: "POST" });
       const data = await response.text();
       document.getElementById("delete-response").innerText = data;
     });
@@ -145,7 +145,7 @@
         return;
       }
       try {
-        const response = await fetch("/admin/data", {
+        const response = await fetch("/admin", {
           headers: { "Authorization": "Bearer " + token }
         });
         const data = await response.json();
