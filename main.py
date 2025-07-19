@@ -12,7 +12,10 @@ from sympy.core.sympify import SympifyError
 from model_trainer import train_model, predict_input, extract_text_from_url
 from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
 from admin import verify_supabase_admin
+from fastapi import APIRouter, Depends
+# from admin_auth import verify_supabase_admin  # jika disimpan di file lain
 
+admin_router = APIRouter()
 # Load environment
 load_dotenv()
 
@@ -29,10 +32,9 @@ templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
 
-@app.get("/admin/data")
+@admin_router.get("/admin/data")
 def get_admin_data(user=Depends(verify_supabase_admin)):
-    return {"msg": "Authorized", "email": user["email"]}
-    
+    return {"message": f"Halo admin {user.user.email}!"}
 # ─────────────────────── STARTUP ─────────────────────── #
 @app.on_event("startup")
 def startup_event():
