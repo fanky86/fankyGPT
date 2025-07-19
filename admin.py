@@ -13,10 +13,12 @@ def verify_supabase_admin(authorization: str = Header(...)):
         if not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Token tidak valid")
         token = authorization.split(" ")[1]
+
         headers = {
             "Authorization": f"Bearer {token}",
             "apikey": SUPABASE_API_KEY
         }
+
         response = requests.get(f"{SUPABASE_URL}/auth/v1/user", headers=headers)
         if response.status_code != 200:
             raise HTTPException(status_code=401, detail="Gagal verifikasi token")
