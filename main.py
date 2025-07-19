@@ -64,7 +64,7 @@ async def chat_gpt(request: Request):
     user_input = form.get("message")
     try:
         response = client.chat.completions.create(
-            model="mistralai/mixtral-8x7b-instruct",  # Ganti model ke Mixtral via OpenRouter
+            model="gpt-3.5-turbo",  # Ganti model ke Mixtral via OpenRouter
             messages=[
                 {"role": "system", "content": "Kamu adalah asisten cerdas bernama FankyGPT."},
                 {"role": "user", "content": user_input}
