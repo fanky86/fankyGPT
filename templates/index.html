@@ -4,41 +4,66 @@
   <meta charset="UTF-8">
   <title>FankyGPT Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Favicon -->
-  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-
+  <link rel="icon" href="/static/favicon.png" type="image/png">
   <style>
     * { box-sizing: border-box; }
-    body {
+
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
       background-color: #000;
       color: #fff;
+      height: 100%;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
-      height: 100vh;
     }
+
     header {
-      padding: 1rem;
-      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background-color: #222;
+      padding: 1rem;
       font-size: 1.2rem;
       font-weight: bold;
       border-bottom: 1px solid #333;
-      flex-shrink: 0;
     }
-    .content-wrapper {
+
+    .profile {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .profile img {
       width: 100%;
-      max-width: 100%;
-      margin: 0 auto;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .content-wrapper {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      flex: 1;
+      max-width: 100%;
+      margin: 0 auto;
     }
+
     @media (min-width: 768px) {
       .content-wrapper { max-width: 50%; }
     }
+
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -48,18 +73,25 @@
       gap: 10px;
       background-color: #000;
     }
+
     .bubble {
-      background-color: #000;
-      color: #fff;
       padding: 10px 14px;
       border-radius: 12px;
-      word-wrap: break-word;
       font-size: 1rem;
       line-height: 1.4;
+      word-wrap: break-word;
       max-width: 100%;
     }
-    .user { align-self: flex-end; background-color: #1e1e1e; }
-    .bot { align-self: flex-start; background-color: #333; }
+
+    .user {
+      align-self: flex-end;
+      background-color: #1e1e1e;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background-color: #333;
+    }
 
     form {
       display: flex;
@@ -67,8 +99,8 @@
       padding: 1rem;
       background-color: #222;
       border-top: 1px solid #333;
-      flex-shrink: 0;
     }
+
     input[type="text"] {
       padding: 10px;
       font-size: 1rem;
@@ -78,7 +110,10 @@
       background-color: #333;
       color: #fff;
     }
-    input[type="text"]::placeholder { color: #aaa; }
+
+    input[type="text"]::placeholder {
+      color: #aaa;
+    }
 
     button {
       padding: 10px;
@@ -89,35 +124,40 @@
       color: white;
       cursor: pointer;
     }
-    button:hover { background-color: #2e7d32; }
 
-    .footer-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.95rem;
+    button:hover {
+      background-color: #2e7d32;
     }
 
-    .footer-link a {
-      color: #aaa;
+    .link-lokal {
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .link-lokal a {
+      color: #4caf50;
       text-decoration: none;
     }
 
-    .footer-link a:hover {
+    .link-lokal a:hover {
       text-decoration: underline;
-      color: #fff;
     }
   </style>
 </head>
 <body>
-  <header>🧠 FankyGPT Chat</header>
+
+  <header>
+    🧠 FankyGPT Chat
+    <div class="profile">
+      <img src="/static/avatar.png" alt="Profile">
+    </div>
+  </header>
 
   <div class="content-wrapper">
     <div class="chat-container" id="chat-box">
-      {% if messages %}
-        {% for msg in messages %}
-          <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
-          <div class="bubble bot"><strong>FankyGPT:</strong> {{ msg.bot }}</div>
-        {% endfor %}
+      {% if chat_input and chat_response %}
+        <div class="bubble user"><strong>Kamu:</strong> {{ chat_input }}</div>
+        <div class="bubble bot"><strong>FankyGPT:</strong> {{ chat_response }}</div>
       {% else %}
         <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
       {% endif %}
@@ -128,10 +168,9 @@
       <button type="submit">Kirim</button>
     </form>
 
-    <div class="footer-link">
-      <hr>
-      <a href="/lokal">🔁 Kembali ke model lokal</a>
-      <br><br>
+    <div class="link-lokal">
+      <hr style="border: 0; border-top: 1px solid #444;">
+      <a href="/lokal">🔁 Pindah ke Mode Lokal</a>
     </div>
   </div>
 
@@ -139,5 +178,6 @@
     const chatBox = document.getElementById('chat-box');
     chatBox.scrollTop = chatBox.scrollHeight;
   </script>
+
 </body>
 </html>
