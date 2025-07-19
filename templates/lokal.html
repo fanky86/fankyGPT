@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>FankyGPT Lokal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -35,9 +35,7 @@
       cursor: pointer;
       margin-top: 5px;
     }
-    button:hover {
-      background-color: #2ea043;
-    }
+    button:hover { background-color: #2ea043; }
     .output-box {
       margin-top: 10px;
       padding: 10px;
@@ -45,12 +43,8 @@
       background-color: #161b22;
       border: 1px solid #30363d;
     }
-    hr {
-      border: 1px solid #30363d;
-    }
-    h1, h2, h3 {
-      color: #58a6ff;
-    }
+    hr { border: 1px solid #30363d; }
+    h1, h2, h3 { color: #58a6ff; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -74,18 +68,19 @@
     <h2>Model Lokal</h2>
 
     <!-- Form Prediksi -->
-    <form id="local-form">
+    <form action="/lokal/predict" method="POST">
       <label for="local-input">Masukkan Pertanyaan:</label>
-      <textarea id="local-input" name="input_text" rows="4"></textarea>
+      <textarea id="local-input" name="input_text" rows="4">{{ last_input or '' }}</textarea>
       <button type="submit">Kirim</button>
     </form>
-    <div id="local-response" class="output-box"></div>
-
+    {% if response %}
+      <div class="output-box">{{ response }}</div>
+    {% endif %}
     <hr>
 
     <!-- Form Latih Model -->
     <h3>🎓 Latih Model</h3>
-    <form id="train-form">
+    <form action="/lokal/train" method="POST">
       <table>
         <tr>
           <th>📝 Input</th>
@@ -98,8 +93,6 @@
       </table>
       <button type="submit">Latih</button>
     </form>
-    <div id="train-response" class="output-box"></div>
-
     <hr>
 
     <!-- Form Hapus Model -->
@@ -110,7 +103,6 @@
     <div id="delete-response" class="output-box"></div>
 
     <hr>
-
     <!-- Form Tampilkan Data -->
     <h3>📚 Lihat Data Model</h3>
     <form id="show-form">
@@ -119,7 +111,6 @@
     <div id="show-response" class="output-box"></div>
 
     <hr>
-
     <!-- Tombol Cek Admin -->
     <h3>🛡️ Cek Admin Token</h3>
     <button onclick="cekAdmin()">🔐 Cek Admin Status</button>
@@ -127,44 +118,10 @@
   </div>
 
   <script>
-    // Prediksi lokal
-    document.getElementById("local-form").addEventListener("submit", async function (event) {
-      event.preventDefault();
-      const input = document.getElementById("local-input").value;
-      const response = await fetch("/lokal/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ input_text: input })
-      });
-      const data = await response.text();
-      document.getElementById("local-response").innerText = data;
-    });
-
-    // Latih model
-    document.getElementById("train-form").addEventListener("submit", async function (event) {
-      event.preventDefault();
-      const input = document.getElementById("train-input").value;
-      const output = document.getElementById("train-output").value;
-
-      const response = await fetch("/lokal/train", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          input_text: input,
-          output_text: output
-        })
-      });
-
-      const data = await response.text();
-      document.getElementById("train-response").innerText = data;
-    });
-
     // Hapus model
     document.getElementById("delete-form").addEventListener("submit", async function (event) {
       event.preventDefault();
-      const response = await fetch("/lokal/delete", {
-        method: "POST"
-      });
+      const response = await fetch("/lokal/delete", { method: "POST" });
       const data = await response.text();
       document.getElementById("delete-response").innerText = data;
     });
@@ -172,9 +129,7 @@
     // Tampilkan data model
     document.getElementById("show-form").addEventListener("submit", async function (event) {
       event.preventDefault();
-      const response = await fetch("/lokal/show", {
-        method: "GET"
-      });
+      const response = await fetch("/lokal/show", { method: "GET" });
       const data = await response.text();
       document.getElementById("show-response").innerText = data;
     });
@@ -184,28 +139,18 @@
       const token = prompt("Masukkan token Supabase:");
       const box = document.getElementById("adminStatus");
       box.style.display = "block";
-
       if (!token) {
         box.innerHTML = `❌ Token tidak dimasukkan`;
         box.style.backgroundColor = "#442222";
         return;
       }
-
       try {
         const response = await fetch("/admin/data", {
-          headers: {
-            "Authorization": "Bearer " + token
-          }
+          headers: { "Authorization": "Bearer " + token }
         });
-
         const data = await response.json();
-
         if (response.ok) {
-          box.innerHTML = `
-            ✅ Akses diizinkan<br>
-            <strong>Email:</strong> ${data.email}<br>
-            <strong>Role:</strong> ${data.role}
-          `;
+          box.innerHTML = `✅ Akses diizinkan<br><strong>Email:</strong> ${data.email}<br><strong>Role:</strong> ${data.role}`;
           box.style.backgroundColor = "#1e442f";
         } else {
           box.innerHTML = `❌ Gagal: ${data.detail || "Terjadi kesalahan"}`;
