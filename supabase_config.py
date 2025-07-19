@@ -52,7 +52,7 @@ def save_chat_to_supabase(user_input, response_text, user_id):
     except Exception as e:
         print(f"[✖] Gagal simpan obrolan ke Supabase: {e}")
 
-def get_chat_history(user_id):
+def get_memory(user_id):
     """Ambil seluruh riwayat obrolan berdasarkan user_id"""
     try:
         response = (
