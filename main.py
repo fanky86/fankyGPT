@@ -10,7 +10,7 @@ from sympy.core.sympify import SympifyError
 from fastapi import Depends
 from model_trainer import train_model, predict_input, extract_text_from_url
 from supabase_config import download_model_from_supabase, save_chat_to_supabase, get_memory
-
+from admin import verify_supabase_admin
 # Load environment variables
 load_dotenv()
 
