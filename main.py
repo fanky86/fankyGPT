@@ -7,6 +7,10 @@ from fastapi.templating import Jinja2Templates
 from openai import OpenAI
 from sympy import sympify
 from sympy.core.sympify import SympifyError
+from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
+import os, json
+
 
 # Custom imports
 from model_trainer import train_model, predict_input, extract_text_from_url
@@ -31,7 +35,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 MODEL_FILE = "models/model.pkl"
-
+DATA_FILE = "data/training_data.jsonl"
 @app.get("/admin")
 def get_admin_data(user=Depends(verify_supabase_admin)):
     return {
@@ -206,3 +210,19 @@ def hapus_model(admin=Depends(verify_supabase_admin)):
         return {"status": "not_found", "message": "⚠️ Model belum ada."}
     except Exception as e:
         return {"status": "error", "message": f"❌ Gagal hapus model: {e}"}
+
+@app.get("/lokal/show", response_class=PlainTextResponse)
+async def show_training_data():
+    if not os.path.exists(DATA_FILE):
+        return "❌ Belum ada data training."
+
+    lines = []
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        for line in f:
+            item = json.loads(line.strip())
+            input_text = item.get("input", "[kosong]")
+            output_text = item.get("output", "[kosong]")
+            lines.append(f"📝 Input: {input_text}\n📤 Output: {output_text}\n")
+    return "\n".join(lines)
+
+
