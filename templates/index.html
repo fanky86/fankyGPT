@@ -155,9 +155,11 @@
 
   <div class="content-wrapper">
     <div class="chat-container" id="chat-box">
-      {% if chat_input and chat_response %}
-        <div class="bubble user"><strong>Kamu:</strong> {{ chat_input }}</div>
-        <div class="bubble bot"><strong>FankyGPT:</strong> {{ chat_response }}</div>
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="bubble user"><strong>Kamu:</strong> {{ msg.user }}</div>
+          <div class="bubble bot"><strong>FankyGPT:</strong> {{ msg.bot }}</div>
+        {% endfor %}
       {% else %}
         <div class="bubble bot">Halo! Saya FankyGPT. Silakan ajukan pertanyaan kamu.</div>
       {% endif %}
