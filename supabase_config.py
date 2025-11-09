@@ -2,19 +2,15 @@ from dotenv import load_dotenv
 from supabase import create_client
 from datetime import datetime
 import os
-import uuid
 
-# Load variabel lingkungan dari .env
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 BUCKET_NAME = "model-bucket"
 
-# Inisialisasi client Supabase
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ──────────────── Upload / Download Model ──────────────── #
 def upload_to_supabase(file_path):
     """Upload file model ke Supabase Storage"""
     try:
@@ -39,7 +35,6 @@ def download_model_from_supabase(file_path):
     except Exception as e:
         print(f"[✖] Gagal download dari Supabase: {e}")
 
-# ──────────────── Chat Logs (user ↔ bot) ──────────────── #
 def save_chat_to_supabase(user_input, response_text, user_id):
     """Simpan obrolan ke Supabase"""
     try:
